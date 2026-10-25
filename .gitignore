@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Runtime data (workspaces, local artifacts)
+var/
+backend/var/
+
+# Env files with secrets
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+.next/
+
+# Terraform
+.terraform/
+*.tfstate*
+*.tfplan
