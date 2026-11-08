@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class Task(BaseModel):
-    id: int
+    id: str
     title: str
     done: bool
 

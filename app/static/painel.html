@@ -108,8 +108,8 @@ async function loadTasks() {
   const tasks = await (await fetch("/tasks")).json();
   $("tasks").innerHTML = tasks.length ? tasks.map((t) =>
     `<li class="${t.done ? "done" : ""}"><span>${esc(t.title)}</span>` +
-    `<button class="ghost" onclick="toggle(${t.id}, ${!t.done})" title="Concluir">${t.done ? "↺" : "✔"}</button>` +
-    `<button class="ghost" onclick="removeTask(${t.id})" title="Apagar">🗑</button></li>`).join("")
+    `<button class="ghost" onclick="toggle('${esc(t.id)}', ${!t.done})" title="Concluir">${t.done ? "↺" : "✔"}</button>` +
+    `<button class="ghost" onclick="removeTask('${esc(t.id)}')" title="Apagar">🗑</button></li>`).join("")
     : `<li class="empty">Nenhuma tarefa</li>`;
 }
 

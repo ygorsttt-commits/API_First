@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API_First - Tarefas
-  version: 0.1.0
+  version: 0.2.0
   description: API de lista de tarefas (projeto de estudo API-First).
 
 paths:
@@ -67,7 +67,8 @@ paths:
         in: path
         required: true
         schema:
-          type: integer
+          type: string
+          format: uuid
     get:
       summary: Busca uma tarefa
       operationId: getTask
@@ -116,8 +117,9 @@ components:
       required: [id, title, done]
       properties:
         id:
-          type: integer
-          example: 1
+          type: string
+          format: uuid
+          example: 3f2b8c1e-7a4d-4e9b-9c1a-2d5e6f7a8b9c
         title:
           type: string
           example: Estudar Terraform

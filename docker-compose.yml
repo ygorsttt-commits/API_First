@@ -7,4 +7,21 @@ services:
       - .:/code               # pasta do projeto compartilhada: editou, o container vê
     environment:
       - WATCHFILES_FORCE_POLLING=true   # faz o reload funcionar com arquivos do Windows
+      - DYNAMODB_ENDPOINT=http://dynamodb:8000   # na AWS fica vazio (usa o DynamoDB real)
+      - TABLE_NAME=tasks
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=local          # credenciais falsas: o DynamoDB Local não confere
+      - AWS_SECRET_ACCESS_KEY=local
+    depends_on:
+      - dynamodb
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  dynamodb:
+    image: amazon/dynamodb-local:2.5.4
+    user: root                # permite gravar no volume
+    command: -jar DynamoDBLocal.jar -sharedDb -dbPath /data
+    volumes:
+      - dynamodb-data:/data   # os dados ficam aqui e sobrevivem a reinícios
+
+volumes:
+  dynamodb-data:

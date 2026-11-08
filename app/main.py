@@ -2,13 +2,26 @@
 
 from pathlib import Path
 
+import os
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 
+from app.database import create_table_if_missing
 from app.metrics import get_metrics, metrics_middleware
 from app.routes import tasks
 
-app = FastAPI(title="API_First - Tarefas", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Ao iniciar: no ambiente local, garante que a tabela existe
+    if os.getenv("DYNAMODB_ENDPOINT"):
+        create_table_if_missing()
+    yield
+
+
+app = FastAPI(title="API_First - Tarefas", version="0.2.0", lifespan=lifespan)
 
 app.middleware("http")(metrics_middleware)
 app.include_router(tasks.router)

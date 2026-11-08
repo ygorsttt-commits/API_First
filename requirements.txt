@@ -1,4 +1,6 @@
 fastapi==0.115.12
 uvicorn[standard]==0.34.2
+boto3==1.38.0
 pytest==8.3.5
 httpx==0.28.1
+moto[dynamodb]==5.1.4

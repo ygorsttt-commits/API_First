@@ -42,7 +42,8 @@ infra/         # Terraform
 - Testes espelham o código: `tests/test_<recurso>.py`.
 
 ## Decisões
-- Caso de uso: API de tarefas (CRUD), dados em memória na v1 (banco depois).
+- Caso de uso: API de tarefas (CRUD).
+- Banco: **DynamoDB** (free tier permanente; prioridade é custo ~zero). Local: container `amazon/dynamodb-local` com volume `dynamodb-data`. `id` = UUID (string). Na AWS a tabela será criada pelo Terraform; localmente a API cria ao iniciar. Testes usam `moto`.
 - Desenvolvimento **dentro do container** (Docker Compose + reload; Dev Containers no VS Code). Sem Python instalado na máquina.
 - Testar tudo localmente antes da AWS.
 - Painel web em `/painel` (HTML+JS servido pela API) para testar a API e ver observabilidade via `GET /metrics` (requisições, erros, tempo médio, por rota, últimas requisições).
@@ -50,7 +51,7 @@ infra/         # Terraform
 ## Estado atual
 - Repositório: https://github.com/ygorsttt-commits/API_First (branch `main`)
 - Ambiente: Windows 11, WSL2 (sem distro Linux), Docker Desktop 29.9 instalado e testado. Docker Desktop precisa estar aberto.
-- Feito: `openapi.yaml` (contrato v0.1.0), `.gitignore`
+- Feito: contrato v0.2.0, API + DynamoDB Local (persistência testada), métricas, painel, 12 testes. Último commit no GitHub: `41090ae` (antes do DynamoDB).
 - Subagente `professor` em `.claude/agents/professor.md`: professor de dev e DevOps que guia o aprendizado
 
 ## Próximos passos (até o teste local)
