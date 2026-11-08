@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel API_First</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --text:#1d2330; --muted:#6b7280; --line:#e5e7eb; --ok:#16a34a; --err:#dc2626; --accent:#2563eb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1419; --card:#1a2029; --text:#e6e8eb; --muted:#9aa3ad; --line:#2a323d; --ok:#22c55e; --err:#f87171; --accent:#60a5fa; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--text); font:14px/1.4 system-ui, sans-serif; }
+  main { max-width:960px; margin:0 auto; display:grid; gap:16px; }
+  header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  h1 { font-size:20px; margin:0; }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .status { font-weight:600; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; }
+  .stat .v { font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .l { color:var(--muted); font-size:12px; }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+  table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+  td { padding:4px 0; border-bottom:1px solid var(--line); }
+  td.r { text-align:right; }
+  .s2 { color:var(--ok); } .s4, .s5 { color:var(--err); }
+  .log { max-height:260px; overflow:auto; }
+  form { display:flex; gap:8px; margin-bottom:12px; }
+  input[type=text] { flex:1; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--text); }
+  button { padding:8px 12px; border:0; border-radius:6px; background:var(--accent); color:#fff; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--muted); padding:4px 8px; }
+  ul { list-style:none; margin:0; padding:0; }
+  li { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--line); }
+  li span { flex:1; } li.done span { text-decoration:line-through; color:var(--muted); }
+  .empty { color:var(--muted); }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Painel API_First</h1>
+    <div><span class="status" id="status">…</span> · ligado há <span id="uptime">–</span> · <a href="/docs" target="_blank">/docs</a></div>
+  </header>
+
+  <section class="card">
+    <h2>Observabilidade</h2>
+    <div class="stats">
+      <div class="stat"><div class="v" id="total">–</div><div class="l">Requisições</div></div>
+      <div class="stat"><div class="v" id="errors">–</div><div class="l">Erros (4xx/5xx)</div></div>
+      <div class="stat"><div class="v" id="avg">–</div><div class="l">Tempo médio (ms)</div></div>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Por rota</h2>
+      <table id="routes"></table>
+    </section>
+    <section class="card">
+      <h2>Últimas requisições</h2>
+      <div class="log"><table id="recent"></table></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Teste da API · tarefas</h2>
+    <form id="form">
+      <input type="text" id="title" placeholder="Nova tarefa..." maxlength="200" required>
+      <button>Criar</button>
+    </form>
+    <ul id="tasks"></ul>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function fmtUptime(sec) {
+  const m = Math.floor(sec / 60), h = Math.floor(m / 60);
+  return h ? `${h}h ${m % 60}min` : m ? `${m}min` : `${Math.floor(sec)}s`;
+}
+
+async function refreshMetrics() {
+  try {
+    const h = await fetch("/health");
+    $("status").textContent = h.ok ? "🟢 OK" : "🔴 Erro";
+    const m = await (await fetch("/metrics")).json();
+    $("uptime").textContent = fmtUptime(m.uptime_seconds);
+    $("total").textContent = m.total_requests;
+    $("errors").textContent = m.total_errors;
+    $("avg").textContent = m.avg_ms;
+    const routes = Object.entries(m.by_route).sort((a, b) => b[1] - a[1]);
+    $("routes").innerHTML = routes.length
+      ? routes.map(([r, n]) => `<tr><td>${esc(r)}</td><td class="r">${n}</td></tr>`).join("")
+      : `<tr><td class="empty">Sem requisições ainda</td></tr>`;
+    $("recent").innerHTML = m.recent.map((r) =>
+      `<tr><td>${new Date(r.time).toLocaleTimeString()}</td><td>${esc(r.method)} ${esc(r.path)}</td>` +
+      `<td class="r s${String(r.status)[0]}">${r.status}</td><td class="r">${r.ms}ms</td></tr>`).join("");
+  } catch {
+    $("status").textContent = "🔴 Fora do ar";
+  }
+}
+
+async function loadTasks() {
+  const tasks = await (await fetch("/tasks")).json();
+  $("tasks").innerHTML = tasks.length ? tasks.map((t) =>
+    `<li class="${t.done ? "done" : ""}"><span>${esc(t.title)}</span>` +
+    `<button class="ghost" onclick="toggle(${t.id}, ${!t.done})" title="Concluir">${t.done ? "↺" : "✔"}</button>` +
+    `<button class="ghost" onclick="removeTask(${t.id})" title="Apagar">🗑</button></li>`).join("")
+    : `<li class="empty">Nenhuma tarefa</li>`;
+}
+
+async function call(method, url, body) {
+  await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: body && JSON.stringify(body) });
+  await loadTasks();
+  refreshMetrics();
+}
+
+const toggle = (id, done) => call("PUT", `/tasks/${id}`, { done });
+const removeTask = (id) => call("DELETE", `/tasks/${id}`);
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  await call("POST", "/tasks", { title: $("title").value });
+  $("title").value = "";
+});
+
+loadTasks();
+refreshMetrics();
+setInterval(refreshMetrics, 2000);
+</script>
+</body>
+</html>

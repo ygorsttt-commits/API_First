@@ -1,0 +1,10 @@
+services:
+  api:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8000" # só IPv4 local (o IPv6 do Docker trava neste PC) -> porta 8000 do container
+    volumes:
+      - .:/code               # pasta do projeto compartilhada: editou, o container vê
+    environment:
+      - WATCHFILES_FORCE_POLLING=true   # faz o reload funcionar com arquivos do Windows
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

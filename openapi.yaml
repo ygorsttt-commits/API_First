@@ -1,0 +1,222 @@
+openapi: 3.1.0
+info:
+  title: API_First - Tarefas
+  version: 0.1.0
+  description: API de lista de tarefas (projeto de estudo API-First).
+
+paths:
+  /health:
+    get:
+      summary: Verifica se a API está no ar (usado pelo ALB)
+      operationId: getHealth
+      responses:
+        "200":
+          description: API funcionando
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+
+  /metrics:
+    get:
+      summary: Métricas da API (usado pelo painel)
+      operationId: getMetrics
+      responses:
+        "200":
+          description: Métricas atuais
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Metrics"
+
+  /tasks:
+    get:
+      summary: Lista todas as tarefas
+      operationId: listTasks
+      responses:
+        "200":
+          description: Lista de tarefas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      summary: Cria uma tarefa
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskCreate"
+      responses:
+        "201":
+          description: Tarefa criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Busca uma tarefa
+      operationId: getTask
+      responses:
+        "200":
+          description: Tarefa encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Atualiza uma tarefa
+      operationId: updateTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Tarefa atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      summary: Apaga uma tarefa
+      operationId: deleteTask
+      responses:
+        "204":
+          description: Tarefa apagada
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  schemas:
+    Task:
+      type: object
+      required: [id, title, done]
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Estudar Terraform
+        done:
+          type: boolean
+          example: false
+
+    TaskCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        done:
+          type: boolean
+
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: ok
+
+    Metrics:
+      type: object
+      required: [uptime_seconds, total_requests, total_errors, avg_ms, by_route, recent]
+      properties:
+        uptime_seconds:
+          type: number
+        total_requests:
+          type: integer
+        total_errors:
+          type: integer
+          description: Respostas com status 4xx ou 5xx
+        avg_ms:
+          type: number
+          description: Tempo médio de resposta em milissegundos
+        by_route:
+          type: object
+          description: 'Quantidade de requisições por rota, ex. {"GET /tasks": 30}'
+          additionalProperties:
+            type: integer
+        recent:
+          type: array
+          description: Últimas requisições (mais recente primeiro)
+          items:
+            $ref: "#/components/schemas/RequestLog"
+
+    RequestLog:
+      type: object
+      required: [time, method, path, status, ms]
+      properties:
+        time:
+          type: string
+          format: date-time
+        method:
+          type: string
+        path:
+          type: string
+        status:
+          type: integer
+        ms:
+          type: number
+
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          description: Mensagem de erro (texto) ou lista de erros de validação
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
+
+  responses:
+    NotFound:
+      description: Tarefa não encontrada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            detail: Tarefa não encontrada
+    ValidationError:
+      description: Dados inválidos
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"

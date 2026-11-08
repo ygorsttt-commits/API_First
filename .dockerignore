@@ -1,0 +1,11 @@
+.git
+.gitignore
+.claude
+.vscode
+__pycache__
+*.pyc
+.pytest_cache
+.env
+infra
+*.md
+hello.txt
