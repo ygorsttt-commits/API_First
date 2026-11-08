@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Permissão mínima: o CI só lê o código
+permissions:
+  contents: read
+
+# Se um novo push chegar no mesmo PR, cancela a execução antiga
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualidade:
+    name: Lint e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Lint (ruff)
+        run: ruff check . --output-format=github
+
+      - name: Testes (pytest)
+        run: pytest -v
+
+  contrato:
+    name: Valida contrato OpenAPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validar openapi.yaml
+        run: |
+          pip install openapi-spec-validator==0.7.1
+          openapi-spec-validator openapi.yaml
+
+  imagem:
+    name: Build e scan da imagem
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build da imagem Docker
+        run: docker build -t api-first:${{ github.sha }} .
+
+      - name: Scan de vulnerabilidades (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: api-first:${{ github.sha }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true   # só bloqueia o que já tem correção disponível
+          exit-code: "1"         # falha o job se encontrar

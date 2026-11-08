@@ -62,8 +62,8 @@ infra/         # Terraform
 
 ## Plano CI/CD (padrão empresa)
 Fluxo: branch → PR → CI (lint, testes, OpenAPI, build Docker, Trivy, terraform plan) → revisão → merge na `main` protegida → CD (build → ECR → aprovação manual no Environment `dev` → terraform apply → smoke test `/health`). GitHub acessa a AWS via **OIDC** (sem chaves). State do Terraform em S3. Workflow `destroy` para zerar custo.
-1. Base do repo (README, pyproject/ruff, PR template, CODEOWNERS, dependabot, remover hello.txt) — em andamento na branch `chore/estrutura-repo`
-2. CI: `.github/workflows/ci.yml` + proteção da `main`
+1. ~~Base do repo~~ ✅ (PR #2)
+2. CI: `.github/workflows/ci.yml` (jobs: qualidade, contrato, imagem/Trivy) — branch `ci/pipeline`; depois ativar proteção da `main`
 3. Bootstrap AWS (`infra/bootstrap/`): S3 do state + OIDC
 4. Infra da app (`infra/`): DynamoDB, ECR, VPC, ECS, ALB
 5. CD: `cd.yml` + `destroy.yml`
