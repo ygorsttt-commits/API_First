@@ -24,7 +24,9 @@ Projeto de estudo do Ygor para aprender Git, GitHub, AWS e desenvolvimento de AP
 - **Terraform**: estilo oficial HashiCorp (usar a skill `terraform:terraform-style-guide`), variáveis em `variables.tf`, saídas em `outputs.tf`, tags `Project = "API_First"`.
 - **Custo**: priorizar o mais barato para estudo (sem NAT Gateway, menor tamanho de Fargate); lembrar `terraform destroy` ao final.
 - **Segurança**: nunca commitar segredos ou `.tfstate`; permissões mínimas no IAM.
-- **Git**: commits pequenos, mensagens em português no imperativo ("Adiciona rota de usuários").
+- **Git (fluxo profissional)**: nunca commitar direto na `main`. Todo trabalho em branch (`feat/`, `fix/`, `docs/`, `chore/`, `ci/`, `infra/`) + Pull Request. Commits em Conventional Commits com descrição em português (`feat: adiciona rota de usuários`). Sem `gh` instalado: fazer push da branch e passar o link para o Ygor abrir o PR.
+- **Qualidade**: lint com `ruff` (config em `pyproject.toml`); rodar `docker compose exec api ruff check .` e `pytest` antes de commitar.
+- **Windows**: sem `make`; comandos ficam documentados no README.
 
 ## Estrutura planejada
 ```
@@ -51,10 +53,22 @@ infra/         # Terraform
 ## Estado atual
 - Repositório: https://github.com/ygorsttt-commits/API_First (branch `main`)
 - Ambiente: Windows 11, WSL2 (sem distro Linux), Docker Desktop 29.9 instalado e testado. Docker Desktop precisa estar aberto.
-- Feito: contrato v0.2.0, API + DynamoDB Local (persistência testada), métricas, painel, 12 testes. Último commit no GitHub: `41090ae` (antes do DynamoDB).
+- Feito: contrato v0.2.0, API + DynamoDB Local (persistência testada), métricas, painel, 12 testes. Tudo commitado no GitHub (`6663174`).
+- AWS: conta criada (plano Free), MFA no root, IAM Identity Center com usuário `ygor` (AdministratorAccess, sessão 8h). Região padrão `us-east-1`.
+- PC: AWS CLI 2.39 + Terraform 1.17 instalados. Perfil SSO **`estudos`** (`aws sso login --profile estudos` quando expirar). Usar sempre `--profile estudos` / `AWS_PROFILE=estudos`.
+- Orçamentos criados via CLI (e-mail ygorsttt@gmail.com): `alerta-gasto-zero` (> US$ 0,01) e `limite-mensal` (US$ 5: 85% real / 100% previsto).
+- Se a AWS der "Signature expired": relógio do PC atrasado → sincronizar hora do Windows.
 - Subagente `professor` em `.claude/agents/professor.md`: professor de dev e DevOps que guia o aprendizado
 
-## Próximos passos (até o teste local)
+## Plano CI/CD (padrão empresa)
+Fluxo: branch → PR → CI (lint, testes, OpenAPI, build Docker, Trivy, terraform plan) → revisão → merge na `main` protegida → CD (build → ECR → aprovação manual no Environment `dev` → terraform apply → smoke test `/health`). GitHub acessa a AWS via **OIDC** (sem chaves). State do Terraform em S3. Workflow `destroy` para zerar custo.
+1. Base do repo (README, pyproject/ruff, PR template, CODEOWNERS, dependabot, remover hello.txt) — em andamento na branch `chore/estrutura-repo`
+2. CI: `.github/workflows/ci.yml` + proteção da `main`
+3. Bootstrap AWS (`infra/bootstrap/`): S3 do state + OIDC
+4. Infra da app (`infra/`): DynamoDB, ECR, VPC, ECS, ALB
+5. CD: `cd.yml` + `destroy.yml`
+
+## Histórico: até o teste local
 1. ~~Contrato `openapi.yaml` + `.gitignore`~~ ✅
 2. ~~Container de dev: `Dockerfile`, `docker-compose.yml`, `.dockerignore`, `requirements.txt`~~ ✅ (imagem `api_first-api` builda)
 3. ~~API: `app/main.py`, `app/schemas.py`, `app/routes/tasks.py`~~ ✅ (rotas testadas via curl)

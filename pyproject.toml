@@ -1,0 +1,16 @@
+[project]
+name = "api-first"
+version = "0.2.0"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/F: erros básicos · I: ordem dos imports · B: bugs comuns · UP: sintaxe moderna
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

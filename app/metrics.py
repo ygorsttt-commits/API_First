@@ -2,7 +2,7 @@
 
 import time
 from collections import Counter, deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import Request
 
@@ -38,7 +38,7 @@ async def metrics_middleware(request: Request, call_next):
         _total_errors += 1
     _by_route[f"{request.method} {template}"] += 1
     _recent.appendleft({
-        "time": datetime.now(timezone.utc).isoformat(),
+        "time": datetime.now(UTC).isoformat(),
         "method": request.method,
         "path": path,
         "status": response.status_code,
