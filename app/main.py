@@ -1,9 +1,8 @@
 """Ponto de entrada da API."""
 
-from pathlib import Path
-
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
