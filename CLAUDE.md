@@ -49,6 +49,8 @@ infra/         # Terraform
 - Banco: **DynamoDB** (free tier permanente; prioridade é custo ~zero). Local: container `amazon/dynamodb-local` com volume `dynamodb-data`. `id` = UUID (string). Na AWS a tabela será criada pelo Terraform; localmente a API cria ao iniciar. Testes usam `moto`.
 - Desenvolvimento **dentro do container** (Docker Compose + reload; Dev Containers no VS Code). Sem Python instalado na máquina.
 - Testar tudo localmente antes da AWS.
+- AWS sem ALB por enquanto (custo fixo ~US$ 23/mês parado): ECS Fargate com IP público. ALB entra depois, como etapa de estudo. Dev/prod separados e OIDC também ficam para depois — foco atual: ver o Terraform criando infra.
+- Terraform em `infra/` (state local por enquanto): `terraform.tf`, `providers.tf`, `variables.tf`, `dynamodb.tf`, `ecr.tf`, `outputs.tf`. Rodar com o perfil `estudos`.
 - Painel web em `/painel` (HTML+JS servido pela API) para testar a API e ver observabilidade via `GET /metrics` (requisições, erros, tempo médio, por rota, últimas requisições).
 
 ## Estado atual
@@ -64,7 +66,7 @@ infra/         # Terraform
 ## Plano CI/CD (padrão empresa)
 Fluxo: branch → PR → CI (lint, testes, OpenAPI, build Docker, Trivy, terraform plan) → revisão → merge na `main` protegida → CD (build → ECR → aprovação manual no Environment `dev` → terraform apply → smoke test `/health`). GitHub acessa a AWS via **OIDC** (sem chaves). State do Terraform em S3. Workflow `destroy` para zerar custo.
 1. ~~Base do repo~~ ✅ (PR #2)
-2. CI: `.github/workflows/ci.yml` (jobs: qualidade, contrato, imagem/Trivy) — branch `ci/pipeline`; depois ativar proteção da `main`
+2. ~~CI~~ ✅ (`ci.yml`: qualidade, contrato, imagem/Trivy; PRs #8, #9). Ruleset `protege-main` ativo: exige PR + 3 checks verdes.
 3. Bootstrap AWS (`infra/bootstrap/`): S3 do state + OIDC
 4. Infra da app (`infra/`): DynamoDB, ECR, VPC, ECS, ALB
 5. CD: `cd.yml` + `destroy.yml`
