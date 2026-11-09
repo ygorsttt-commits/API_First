@@ -50,7 +50,10 @@ infra/         # Terraform
 - Desenvolvimento **dentro do container** (Docker Compose + reload; Dev Containers no VS Code). Sem Python instalado na máquina.
 - Testar tudo localmente antes da AWS.
 - AWS sem ALB por enquanto (custo fixo ~US$ 23/mês parado): ECS Fargate com IP público. ALB entra depois, como etapa de estudo. Dev/prod separados e OIDC também ficam para depois — foco atual: ver o Terraform criando infra.
-- Terraform em `infra/` (state local por enquanto): `terraform.tf`, `providers.tf`, `variables.tf`, `dynamodb.tf`, `ecr.tf`, `outputs.tf`. Rodar com o perfil `estudos`.
+- Terraform em `infra/` (state local por enquanto): `terraform.tf`, `providers.tf`, `variables.tf`, `dynamodb.tf`, `ecr.tf`, `network.tf` (VPC padrão + SG só p/ o IP do Ygor), `iam.tf`, `ecs.tf`, `outputs.tf`. Rodar com o perfil `estudos`. `infra/terraform.tfvars` (local, fora do Git) define `allowed_cidr` e `image_tag`.
+- Deploy manual: build → push no ECR com tag = hash curto do commit → `image_tag` no tfvars → `terraform apply`. No Windows o `docker login` no ECR falha (credential store): usar `DOCKER_CONFIG` temporário com o auth gravado direto.
+- IP público do container muda a cada reinício: obter via `aws ecs list-tasks` → `describe-tasks` (ENI) → `ec2 describe-network-interfaces`.
+- Para zerar custo do ECS sem perder DynamoDB/ECR: `terraform destroy -target=aws_ecs_service.api` (ou destroy completo).
 - Painel web em `/painel` (HTML+JS servido pela API) para testar a API e ver observabilidade via `GET /metrics` (requisições, erros, tempo médio, por rota, últimas requisições).
 
 ## Estado atual
