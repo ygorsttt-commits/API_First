@@ -26,6 +26,7 @@ Projeto de estudo do Ygor para aprender Git, GitHub, AWS e desenvolvimento de AP
 - **Segurança**: nunca commitar segredos ou `.tfstate`; permissões mínimas no IAM.
 - **Git (fluxo profissional)**: nunca commitar direto na `main`. Todo trabalho em branch (`feat/`, `fix/`, `docs/`, `chore/`, `ci/`, `infra/`) + Pull Request. Commits em Conventional Commits com descrição em português (`feat: adiciona rota de usuários`). Sem `gh` instalado: fazer push da branch e passar o link para o Ygor abrir o PR.
 - **Qualidade**: lint com `ruff` (config em `pyproject.toml`); rodar `docker compose exec api ruff check .` e `pytest` antes de commitar.
+- **Dependências**: `requirements.txt` = produção (vai para a imagem); `requirements-dev.txt` = teste/lint (só no compose via `INSTALL_DEV=true` e no CI). Dockerfile roda `apt-get upgrade` para correções de segurança.
 - **Windows**: sem `make`; comandos ficam documentados no README.
 
 ## Estrutura planejada

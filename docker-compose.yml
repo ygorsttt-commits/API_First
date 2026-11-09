@@ -1,6 +1,9 @@
 services:
   api:
-    build: .
+    build:
+      context: .
+      args:
+        INSTALL_DEV: "true"   # dev local inclui pytest, moto e ruff
     ports:
       - "127.0.0.1:8080:8000" # só IPv4 local (o IPv6 do Docker trava neste PC) -> porta 8000 do container
     volumes:
