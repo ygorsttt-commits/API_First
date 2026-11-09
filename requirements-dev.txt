@@ -1,5 +1,5 @@
 # Dependências de DESENVOLVIMENTO e TESTE (não vão para produção)
-pytest==8.3.5
+pytest==9.2.0
 httpx==0.28.1
 moto[dynamodb]==5.1.4
 ruff==0.11.8
