@@ -1,0 +1,25 @@
+# Teste manual: prova que o GitHub consegue entrar na AWS via OIDC, sem senha.
+# Rodar em: Actions -> "Teste OIDC" -> Run workflow
+name: Teste OIDC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write # permite pedir o token OIDC ao GitHub
+  contents: read
+
+jobs:
+  login:
+    name: Login na AWS via OIDC
+    runs-on: ubuntu-latest
+    environment: aws # exige aprovação e só a main pode usar
+    steps:
+      - name: Assumir a role de deploy
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::265469156400:role/api-first-github-deploy
+          aws-region: us-east-1
+
+      - name: Quem sou eu na AWS?
+        run: aws sts get-caller-identity

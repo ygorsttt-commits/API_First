@@ -47,6 +47,8 @@ Fontes: [HashiCorp — Terraform workflow](https://developer.hashicorp.com/terra
 - ~~Actions fixadas por tag, não por SHA (regra 12)~~ ✅ corrigido (Dependabot mantém os SHAs atualizados).
 - Deploy manual do PC, sem CD/OIDC (regras 6 e 11) — resolver nas Fases 3 e 5.
 - Usuário SSO com AdministratorAccess (regra 10) — aceitável para conta pessoal de estudo; revisar depois.
+- Role `api-first-github-deploy` com AdministratorAccess (regra 10) — mitigado: só o GitHub Environment `aws` (aprovação manual) pode assumir. Refinar para permissões mínimas.
+- State do `infra/bootstrap/` é local (por design: ele cria o bucket). Guardar o arquivo `infra/bootstrap/terraform.tfstate`; não apagar.
 - Sem rollback documentado (regra 9) — documentar com o CD.
 
 ## Stack
