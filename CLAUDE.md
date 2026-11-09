@@ -44,7 +44,7 @@ Fontes: [HashiCorp — Terraform workflow](https://developer.hashicorp.com/terra
 **Desvios conhecidos (dívida técnica a corrigir)**
 - Infra criada com `apply` antes do merge (PRs #10 e infra/ecs-fargate) — corrigido a partir daqui pela regra 2.
 - State do Terraform local (regra 13) — resolver na Fase 3 (S3 + lock).
-- Actions fixadas por tag, não por SHA (regra 12) — corrigir num PR de CI.
+- ~~Actions fixadas por tag, não por SHA (regra 12)~~ ✅ corrigido (Dependabot mantém os SHAs atualizados).
 - Deploy manual do PC, sem CD/OIDC (regras 6 e 11) — resolver nas Fases 3 e 5.
 - Usuário SSO com AdministratorAccess (regra 10) — aceitável para conta pessoal de estudo; revisar depois.
 - Sem rollback documentado (regra 9) — documentar com o CD.
