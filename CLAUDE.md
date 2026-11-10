@@ -111,7 +111,10 @@ Fluxo: branch → PR → CI (lint, testes, OpenAPI, build Docker, Trivy, terrafo
 1. ~~Base do repo~~ ✅ (PR #2)
 2. ~~CI~~ ✅ (`ci.yml`: qualidade, contrato, imagem/Trivy; PRs #8, #9). Ruleset `protege-main` ativo: exige PR + 3 checks verdes.
 3. ~~Bootstrap AWS (`infra/bootstrap/`): S3 do state + OIDC~~ ✅ (PR #13)
-4. Infra da app (`infra/`): DynamoDB, ECR, VPC, ECS, ALB
+4. Infra da app (`infra/`): DynamoDB, ECR, VPC, ECS, ALB — em andamento: state no S3 ✅ (PR #14), `terraform plan` no CI via OIDC ✅ (PR #15).
+   - Job "Terraform plan" roda só em PRs, com a role só-leitura `api-first-github-plan`. Usa as *variables* do repositório `TF_ALLOWED_CIDR` e `TF_IMAGE_TAG` (atualizar se o IP ou a imagem mudarem).
+   - O GitHub envia o `sub` do OIDC com IDs: `repo:ygorsttt-commits@250064056/API_First@1432740330:...` (PR #16). A confiança das roles usa esse formato.
+   - Local: rodar Terraform com `$env:AWS_PROFILE='estudos'` (o backend S3 não lê o tfvars).
 5. CD: `cd.yml` + `destroy.yml`
 
 ## Histórico: até o teste local
