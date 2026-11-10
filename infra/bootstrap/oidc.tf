@@ -1,3 +1,11 @@
+# O GitHub envia o "sub" do token no formato com IDs imutáveis:
+# repo:dono@ID/repo@ID:... (um repo recriado com o mesmo nome tem outro ID)
+locals {
+  github_owner = split("/", var.github_repository)[0]
+  github_repo  = split("/", var.github_repository)[1]
+  github_sub   = "repo:${local.github_owner}@${var.github_owner_id}/${local.github_repo}@${var.github_repository_id}"
+}
+
 # Faz a AWS confiar em identidades emitidas pelo GitHub Actions
 resource "aws_iam_openid_connect_provider" "github" {
   url            = "https://token.actions.githubusercontent.com"
@@ -26,7 +34,7 @@ data "aws_iam_policy_document" "github_plan_assume" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repository}:pull_request"]
+      values   = ["${local.github_sub}:pull_request"]
     }
   }
 }
@@ -77,7 +85,7 @@ data "aws_iam_policy_document" "github_deploy_assume" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repository}:environment:${var.github_deploy_environment}"]
+      values   = ["${local.github_sub}:environment:${var.github_deploy_environment}"]
     }
   }
 }

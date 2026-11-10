@@ -16,6 +16,18 @@ variable "github_deploy_environment" {
   default     = "aws"
 }
 
+variable "github_owner_id" {
+  description = "ID numérico do dono do repositório no GitHub (vai no sub do token OIDC)"
+  type        = string
+  default     = "250064056"
+}
+
+variable "github_repository_id" {
+  description = "ID numérico do repositório no GitHub (vai no sub do token OIDC)"
+  type        = string
+  default     = "1432740330"
+}
+
 variable "github_repository" {
   description = "Repositório GitHub autorizado a acessar a AWS via OIDC (dono/nome)"
   type        = string
