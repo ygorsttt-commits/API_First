@@ -9,9 +9,9 @@ variable "allowed_cidr" {
 }
 
 variable "aws_profile" {
-  description = "Perfil do AWS CLI usado para autenticar (SSO)"
+  description = "Perfil do AWS CLI (SSO) no PC. null no CI, que autentica via OIDC"
   type        = string
-  default     = "estudos"
+  default     = null
 }
 
 variable "aws_region" {
