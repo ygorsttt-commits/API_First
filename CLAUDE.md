@@ -43,7 +43,7 @@ Fontes: [HashiCorp — Terraform workflow](https://developer.hashicorp.com/terra
 
 **Desvios conhecidos (dívida técnica a corrigir)**
 - Infra criada com `apply` antes do merge (PRs #10 e infra/ecs-fargate) — corrigido a partir daqui pela regra 2.
-- State do Terraform local (regra 13) — resolver na Fase 3 (S3 + lock).
+- ~~State do Terraform local (regra 13)~~ ✅ state da app em `s3://api-first-tfstate-265469156400/app/terraform.tfstate` (lock nativo `use_lockfile`).
 - ~~Actions fixadas por tag, não por SHA (regra 12)~~ ✅ corrigido (Dependabot mantém os SHAs atualizados).
 - Deploy manual do PC, sem CD/OIDC (regras 6 e 11) — resolver nas Fases 3 e 5.
 - Usuário SSO com AdministratorAccess (regra 10) — aceitável para conta pessoal de estudo; revisar depois.
@@ -110,7 +110,7 @@ infra/         # Terraform
 Fluxo: branch → PR → CI (lint, testes, OpenAPI, build Docker, Trivy, terraform plan) → revisão → merge na `main` protegida → CD (build → ECR → aprovação manual no Environment `dev` → terraform apply → smoke test `/health`). GitHub acessa a AWS via **OIDC** (sem chaves). State do Terraform em S3. Workflow `destroy` para zerar custo.
 1. ~~Base do repo~~ ✅ (PR #2)
 2. ~~CI~~ ✅ (`ci.yml`: qualidade, contrato, imagem/Trivy; PRs #8, #9). Ruleset `protege-main` ativo: exige PR + 3 checks verdes.
-3. Bootstrap AWS (`infra/bootstrap/`): S3 do state + OIDC
+3. ~~Bootstrap AWS (`infra/bootstrap/`): S3 do state + OIDC~~ ✅ (PR #13)
 4. Infra da app (`infra/`): DynamoDB, ECR, VPC, ECS, ALB
 5. CD: `cd.yml` + `destroy.yml`
 
